@@ -1131,32 +1131,25 @@
         }
 
         pc.ontrack = (event) => {
-            const audioCtxRemote = new AudioContext();
-            // Resume AudioContext (browser autoplay policy)
-            if (audioCtxRemote.state === 'suspended') {
-                audioCtxRemote.resume();
-            }
-            const source = audioCtxRemote.createMediaStreamSource(event.streams[0]);
-
-            // GainNode for volume control
-            const remoteGain = audioCtxRemote.createGain();
-            remoteGain.gain.value = (remoteDelayNodes[targetId]?.volume ?? 100) / 100;
-
-            // DelayNode for sync control
-            const delayNode = audioCtxRemote.createDelay(1.0);
-            delayNode.delayTime.value = (remoteDelayNodes[targetId]?.delay || 0) / 1000;
-
-            source.connect(remoteGain);
-            remoteGain.connect(delayNode);
-            delayNode.connect(audioCtxRemote.destination);
+            console.log(`[WebRTC] Received track from ${targetId}`);
+            const audio = new Audio();
+            audio.srcObject = event.streams[0];
+            audio.autoplay = true;
+            audio.volume = (remoteDelayNodes[targetId]?.volume ?? 100) / 100;
+            audio.play().catch(err => console.error('[WebRTC] Audio play error:', err));
 
             remoteDelayNodes[targetId] = {
-                gainNode: remoteGain,
-                delayNode,
-                ctx: audioCtxRemote,
-                delay: remoteDelayNodes[targetId]?.delay || 0,
+                audio,
                 volume: remoteDelayNodes[targetId]?.volume ?? 100
             };
+        };
+
+        pc.onconnectionstatechange = () => {
+            console.log(`[WebRTC] Connection to ${targetId}: ${pc.connectionState}`);
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            console.log(`[WebRTC] ICE to ${targetId}: ${pc.iceConnectionState}`);
         };
 
         pc.onicecandidate = (event) => {
