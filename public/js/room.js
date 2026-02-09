@@ -8,7 +8,7 @@
     const MAX_RECENT = 50;
     const STORAGE_FAVORITES = 'karaoke_favorites';
     const STORAGE_RECENT = 'karaoke_recent';
-    let ytSyncDelay = 1500; // YouTube 싱크 딜레이 (ms), 기본 1.5초
+    let ytSyncDelay = 0; // YouTube 싱크 딜레이 (ms), 슬라이더로 조절
 
     // ── URL Params ──────────────────────────────────────────
     const params = new URLSearchParams(window.location.search);
