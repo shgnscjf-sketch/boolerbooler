@@ -349,9 +349,9 @@
               <span class="voice-volume-val">${getVoiceVolume(slotData.socketId)}%</span>
             </div>
             <div class="voice-delay-slider" onclick="event.stopPropagation()">
-              <label>⏱ 싱크</label>
-              <input type="range" min="0" max="1000" value="${getVoiceDelay(slotData.socketId)}" data-sid="${slotData.socketId}" />
-              <span class="voice-delay-val">${getVoiceDelay(slotData.socketId)}ms</span>
+              <label>🎤 보이스 싱크</label>
+              <input type="range" min="0" max="1000" step="100" value="${getVoiceDelay(slotData.socketId)}" data-sid="${slotData.socketId}" />
+              <span class="voice-delay-val">${(getVoiceDelay(slotData.socketId) / 1000).toFixed(1)}초</span>
             </div>
           ` : ''}
         </div>
@@ -432,7 +432,7 @@
                 const sid = slider.dataset.sid;
                 const val = parseInt(slider.value);
                 const label = slider.parentElement.querySelector('.voice-delay-val');
-                if (label) label.textContent = val + 'ms';
+                if (label) label.textContent = (val / 1000).toFixed(1) + '초';
                 applyVoiceDelay(sid, val);
             });
         });
