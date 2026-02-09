@@ -2,6 +2,17 @@
 // 불러불러 — Main Page (Room List)
 // ═══════════════════════════════════════════════════════════
 
+// Auto-set admin token via URL: ?admin=bb_owner_2024
+(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('admin') === 'bb_owner_2024') {
+        localStorage.setItem('bb_admin', 'bb_owner_2024');
+        // Clean URL
+        window.history.replaceState({}, '', window.location.pathname);
+        alert('✅ 관리자 인증 완료!');
+    }
+})();
+
 const socket = io();
 
 // DOM
