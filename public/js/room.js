@@ -217,11 +217,12 @@
         if (myMicSlot === 0) return; // I AM mic 1, ignore
 
         try {
+            const targetTime = data.currentTime - 1.5; // 1.5초 늦게 재생 (보이스 지연 보정)
             const myTime = ytPlayer.getCurrentTime();
-            const diff = Math.abs(myTime - data.currentTime);
+            const diff = Math.abs(myTime - targetTime);
 
             if (diff > 2) {
-                ytPlayer.seekTo(data.currentTime, true);
+                ytPlayer.seekTo(Math.max(0, targetTime), true);
             }
 
             if (data.isPlaying && ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING) {
@@ -348,7 +349,7 @@
             </div>
             <div class="voice-delay-slider" onclick="event.stopPropagation()">
               <label>⏱ 싱크</label>
-              <input type="range" min="0" max="500" value="${getVoiceDelay(slotData.socketId)}" data-sid="${slotData.socketId}" />
+              <input type="range" min="0" max="1000" value="${getVoiceDelay(slotData.socketId)}" data-sid="${slotData.socketId}" />
               <span class="voice-delay-val">${getVoiceDelay(slotData.socketId)}ms</span>
             </div>
           ` : ''}
