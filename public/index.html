@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎤 불러불러</title>
+  <meta name="description" content="친구들과 함께하는 유튜브 링크 공유 플랫폼. 방에 입장해서 영상을 공유하세요!" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <h1 class="header__logo">불러불러</h1>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="rooms-header">
+      <input type="text" class="room-search-input" id="roomSearchInput" placeholder="방 검색..." autocomplete="off" />
+      <button class="btn btn-primary" id="createRoomBtn">
+        ➕ 새 방 만들기
+      </button>
+    </div>
+
+    <div class="rooms-grid" id="roomsGrid">
+      <!-- Room cards will be injected here -->
+    </div>
+  </main>
+
+  <!-- Create Room Modal -->
+  <div class="modal-overlay" id="createRoomModal">
+    <div class="modal">
+      <h3 class="modal__title">➕ 새 방 만들기</h3>
+      <input type="text" class="modal__input" id="roomNameInput" placeholder="방 이름을 입력하세요..." maxlength="30"
+        autocomplete="off" />
+      <input type="password" class="modal__input" id="roomPasswordInput" placeholder="비밀번호 (선택사항)" maxlength="20"
+        autocomplete="off" style="margin-top: -0.5rem;" />
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">🎤 마이크
+          개수</label>
+        <div style="display: flex; gap: 0.5rem;" id="micCountSelector">
+          <button class="btn btn-secondary btn-sm mic-count-opt" data-count="1">1개</button>
+          <button class="btn btn-primary btn-sm mic-count-opt" data-count="2">2개</button>
+          <button class="btn btn-secondary btn-sm mic-count-opt" data-count="3">3개</button>
+          <button class="btn btn-secondary btn-sm mic-count-opt" data-count="4">4개</button>
+        </div>
+      </div>
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">👥 최대 인원
+          <span id="maxUsersLabel" style="color: var(--neon-blue); font-weight: 700;">20명</span></label>
+        <input type="range" class="slider" id="maxUsersSlider" min="2" max="20" value="20" />
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn-secondary" id="cancelCreateBtn">취소</button>
+        <button class="btn btn-primary" id="confirmCreateBtn">만들기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎤 불러불러 — 방</title>
+    <meta name="description" content="불러불러 — 친구들과 함께 유튜브 영상을 공유하세요." />
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+
+    <main class="container">
+        <!-- Home button -->
+        <a href="/" class="room-home-btn" title="메인 로비로">
+            <span>불러</span>
+            <span>불러</span>
+        </a>
+        <div class="room-layout">
+
+            <!-- Room Header (empty - controls moved to users section) -->
+            <div class="room-header" style="display:none;"></div>
+            <!-- Hidden elements for JS -->
+            <span id="roomName" style="display:none;">방</span>
+            <span id="userCountBadge" style="display:none;">0</span>
+            <span id="userMaxBadge" style="display:none;">20</span>
+
+            <!-- Main Area: Player + Search -->
+            <div class="room-main">
+
+                <!-- YouTube Player -->
+                <div class="player-section glass-card">
+                    <div class="player-wrapper" id="playerWrapper">
+                        <div class="player-idle" id="playerIdle">
+                            <div class="player-idle__icon">🎤</div>
+                            <div class="player-idle__text">영상을 검색해서 재생해보세요!</div>
+                        </div>
+                        <div id="yt-player"></div>
+                    </div>
+                    <p
+                        style="font-size: 0.65rem; color: rgba(255,255,255,0.25); text-align: center; margin: 0.5rem 0 0; line-height: 1.4;">
+                        본 사이트는 유튜브 API를 활용한 링크 공유 서비스이며, 영상의 저작권은 원작자에게 있습니다. 저작권자의 요청 시 특정 영상은 재생이 제한될 수 있습니다.</p>
+                </div>
+
+                <!-- Search + Chat Row -->
+                <div class="search-chat-row">
+
+                    <!-- Search Section (locked when not mic 1) -->
+                    <div class="search-section glass-card" id="searchSection">
+                        <!-- Lock overlay -->
+                        <div class="search-lock-overlay" id="searchLockOverlay">
+                            <div class="search-lock-overlay__content">
+                                🔒 1번 마이크를 잡은 사람만 영상을 제어할 수 있습니다
+                            </div>
+                        </div>
+                        <div class="search-bar">
+                            <input type="text" class="search-bar__input" id="searchInput" placeholder="🔍 영상 검색..."
+                                autocomplete="off" />
+                            <button class="btn btn-neon-blue btn-sm" id="searchBtn">검색</button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div id="tabContent">
+                            <div class="result-list" id="searchResults" data-tab-content="search">
+                                <div class="empty-state">
+                                    <div class="empty-state__icon">🔍</div>
+                                    <div>영상을 검색해보세요</div>
+                                </div>
+                            </div>
+                            <div class="result-list" id="favoritesList" data-tab-content="favorites"
+                                style="display: none;">
+                                <div class="empty-state">
+                                    <div class="empty-state__icon">⭐</div>
+                                    <div>즐겨찾기한 영상이 없습니다</div>
+                                </div>
+                            </div>
+                            <div class="result-list" id="recentList" data-tab-content="recent" style="display: none;">
+                                <div class="empty-state">
+                                    <div class="empty-state__icon">🕐</div>
+                                    <div>최근 재생한 영상이 없습니다</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Section -->
+                    <div class="chat-section glass-card">
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-emoji-row">
+                            <button class="chat-emoji-btn" data-emoji="👏"><span class="emoji-icon">👏</span>
+                                박수</button>
+                            <button class="chat-emoji-btn" data-emoji="👍"><span class="emoji-icon">👍</span>
+                                따봉</button>
+                            <button class="chat-emoji-btn" data-emoji="❤️"><span class="emoji-icon">❤️</span>
+                                하트</button>
+                            <button class="chat-emoji-btn" data-emoji="갱차나!"><span class="jump-text"><span
+                                        class="jump-char">갱</span><span class="jump-char">차</span><span
+                                        class="jump-char">나</span><span class="jump-char">!</span></span></button>
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="text" id="chatInput" placeholder="메시지 입력..." maxlength="200"
+                                autocomplete="off" />
+                            <button class="btn btn-primary btn-sm" id="chatSendBtn">전송</button>
+                        </div>
+                    </div>
+
+                </div><!-- end search-chat-row -->
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="room-sidebar">
+
+                <!-- Mic Slots Section -->
+                <div class="mic-section glass-card">
+                    <div class="mic-section__title">🎙️ 마이크</div>
+                    <div class="mic-slots" id="micSlots">
+                        <!-- Dynamically generated mic slot cards -->
+                    </div>
+
+                    <!-- Audio visualizer (shown when user holds a mic) -->
+                    <div class="audio-visualizer" id="audioVisualizer" style="display: none;">
+                        <div class="bar" style="height: 4px;"></div>
+                        <div class="bar" style="height: 4px;"></div>
+                        <div class="bar" style="height: 4px;"></div>
+                        <div class="bar" style="height: 4px;"></div>
+                        <div class="bar" style="height: 4px;"></div>
+                        <div class="bar" style="height: 4px;"></div>
+                        <div class="bar" style="height: 4px;"></div>
+                        <div class="bar" style="height: 4px;"></div>
+                    </div>
+                </div>
+
+                <!-- Hidden audio elements for JS processing -->
+                <div id="audioSettings" style="display:none;">
+                    <button id="micTestBtn">🔊 마이크 테스트 OFF</button>
+                    <button id="shyModeBtn">🫣 부끄럼쟁이 OFF</button>
+                    <input type="range" id="volumeSlider" min="0" max="200" value="100" />
+                    <span id="volumeValue">100%</span>
+                    <input type="range" id="reverbSlider" min="0" max="100" value="0" />
+                    <span id="reverbValue">0%</span>
+                </div>
+
+                <div class="users-section glass-card">
+                    <div class="users-section__title">
+                        <span class="users-section__room-name" id="roomNameDisplay">방</span>
+                        <div class="users-section__badge" id="usersBadge" style="cursor:pointer;" title="방 설정">
+                            ⚙️ <span id="userCountDisplay">0</span>/<span id="userMaxDisplay">20</span>명
+                        </div>
+                    </div>
+                    <div class="user-list" id="userList">
+                        <!-- Users injected here -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Room Settings Modal -->
+    <div class="modal-overlay" id="roomSettingsModal">
+        <div class="modal">
+            <h3 class="modal__title">⚙️ 방 설정</h3>
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.4rem;">방
+                    제목</label>
+                <input type="text" class="modal__input" id="settingsRoomName" maxlength="30" autocomplete="off" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.4rem;">🔒
+                    비밀번호 (비우면 해제)</label>
+                <input type="password" class="modal__input" id="settingsPassword" placeholder="비밀번호 입력..."
+                    maxlength="20" autocomplete="off" />
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.4rem;">🎤
+                    마이크 개수</label>
+                <div style="display:flex; gap:0.5rem;" id="settingsMicCount">
+                    <button class="btn btn-secondary btn-sm settings-mic-opt" data-count="1">1개</button>
+                    <button class="btn btn-secondary btn-sm settings-mic-opt" data-count="2">2개</button>
+                    <button class="btn btn-secondary btn-sm settings-mic-opt" data-count="3">3개</button>
+                    <button class="btn btn-secondary btn-sm settings-mic-opt" data-count="4">4개</button>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+                <label style="display:block; font-size:0.85rem; color:var(--text-secondary); margin-bottom:0.4rem;">👥
+                    최대 인원
+                    <span id="settingsMaxUsersLabel" style="color:var(--neon-blue); font-weight:700;">20명</span></label>
+                <input type="range" class="slider" id="settingsMaxUsers" min="2" max="50" value="20" />
+            </div>
+            <div class="modal__actions">
+                <button class="btn btn-secondary" id="settingsCancelBtn">취소</button>
+                <button class="btn btn-primary" id="settingsSaveBtn">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/room.js"></script>
+</body>
+
+</html>
