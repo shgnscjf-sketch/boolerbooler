@@ -142,7 +142,13 @@
 
     // User events
     socket.on('user-list', (users) => renderUsers(users));
-    socket.on('user-joined', (u) => showToast(`${u.nickname} 님이 입장했습니다`));
+    socket.on('user-joined', (u) => {
+        showToast(`${u.nickname} 님이 입장했습니다`);
+        // If I have mic on, create WebRTC connection to the new user
+        if (isMicOn && u.socketId !== mySocketId) {
+            createPeerConnection(u.socketId, true);
+        }
+    });
     socket.on('user-left', (u) => showToast(`${u.nickname} 님이 퇴장했습니다`));
     socket.on('user-mic-status', ({ socketId, isOn }) => {
         const el = document.querySelector(`.user-item[data-sid="${socketId}"] .user-item__mic-icon`);
@@ -1086,7 +1092,28 @@
     const rtcConfig = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun.relay.metered.ca:80' },
+            {
+                urls: 'turn:global.relay.metered.ca:80',
+                username: 'e8dd65b92f6eae8fe015a101',
+                credential: '1laBSosbEq/1GATC'
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:80?transport=tcp',
+                username: 'e8dd65b92f6eae8fe015a101',
+                credential: '1laBSosbEq/1GATC'
+            },
+            {
+                urls: 'turn:global.relay.metered.ca:443',
+                username: 'e8dd65b92f6eae8fe015a101',
+                credential: '1laBSosbEq/1GATC'
+            },
+            {
+                urls: 'turns:global.relay.metered.ca:443?transport=tcp',
+                username: 'e8dd65b92f6eae8fe015a101',
+                credential: '1laBSosbEq/1GATC'
+            }
         ]
     };
 
@@ -1105,6 +1132,10 @@
 
         pc.ontrack = (event) => {
             const audioCtxRemote = new AudioContext();
+            // Resume AudioContext (browser autoplay policy)
+            if (audioCtxRemote.state === 'suspended') {
+                audioCtxRemote.resume();
+            }
             const source = audioCtxRemote.createMediaStreamSource(event.streams[0]);
 
             // GainNode for volume control
