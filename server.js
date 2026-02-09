@@ -180,7 +180,8 @@ io.on('connection', (socket) => {
       maxUsers,
       password,
       mics: [null, null, null, null],
-      currentMR: null
+      currentMR: null,
+      createdAt: Date.now()
     });
 
     io.emit('room-list', serializeRooms());
@@ -472,8 +473,10 @@ io.on('connection', (socket) => {
     }
 
     // Also clean up any other empty rooms (e.g. password rooms never joined)
+    // But skip rooms created less than 15 seconds ago (still being joined)
+    const now = Date.now();
     for (const [id, room] of rooms) {
-      if (room.users.size === 0) {
+      if (room.users.size === 0 && (now - room.createdAt) > 15000) {
         rooms.delete(id);
       }
     }
