@@ -445,20 +445,19 @@
     }
 
     function applyVoiceDelay(socketId, ms) {
+        remoteDelayNodes[socketId] = { ...(remoteDelayNodes[socketId] || {}), delay: ms };
         if (remoteDelayNodes[socketId]?.delayNode) {
-            remoteDelayNodes[socketId].delay = ms;
             remoteDelayNodes[socketId].delayNode.delayTime.value = ms / 1000;
-        } else {
-            remoteDelayNodes[socketId] = { ...(remoteDelayNodes[socketId] || {}), delay: ms };
         }
     }
 
     function applyVoiceVolume(socketId, pct) {
+        remoteDelayNodes[socketId] = { ...(remoteDelayNodes[socketId] || {}), volume: pct };
         if (remoteDelayNodes[socketId]?.gainNode) {
-            remoteDelayNodes[socketId].volume = pct;
             remoteDelayNodes[socketId].gainNode.gain.value = pct / 100;
-        } else {
-            remoteDelayNodes[socketId] = { ...(remoteDelayNodes[socketId] || {}), volume: pct };
+        }
+        if (remoteDelayNodes[socketId]?.audio) {
+            remoteDelayNodes[socketId].audio.volume = pct / 100;
         }
     }
 
@@ -1132,14 +1131,36 @@
 
         pc.ontrack = (event) => {
             console.log(`[WebRTC] Received track from ${targetId}`);
+            const stream = event.streams[0];
+
+            // Use Audio element for reliable autoplay
             const audio = new Audio();
-            audio.srcObject = event.streams[0];
+            audio.srcObject = stream;
             audio.autoplay = true;
             audio.volume = (remoteDelayNodes[targetId]?.volume ?? 100) / 100;
+            // Mute the audio element — we route through AudioContext instead
+            audio.muted = true;
             audio.play().catch(err => console.error('[WebRTC] Audio play error:', err));
+
+            // Route through AudioContext for delay & gain control
+            const ctx = new AudioContext();
+            if (ctx.state === 'suspended') ctx.resume();
+            const source = ctx.createMediaStreamSource(stream);
+            const gainNode = ctx.createGain();
+            gainNode.gain.value = (remoteDelayNodes[targetId]?.volume ?? 100) / 100;
+            const delayNode = ctx.createDelay(1.0);
+            delayNode.delayTime.value = (remoteDelayNodes[targetId]?.delay || 0) / 1000;
+
+            source.connect(gainNode);
+            gainNode.connect(delayNode);
+            delayNode.connect(ctx.destination);
 
             remoteDelayNodes[targetId] = {
                 audio,
+                ctx,
+                gainNode,
+                delayNode,
+                delay: remoteDelayNodes[targetId]?.delay || 0,
                 volume: remoteDelayNodes[targetId]?.volume ?? 100
             };
         };
