@@ -104,7 +104,7 @@
     // ═══════════════════════════════════════════════════════
     socket.on('connect', () => {
         mySocketId = socket.id;
-        socket.emit('join-room', { roomId, password: roomPassword }, (res) => {
+        socket.emit('join-room', { roomId, password: roomPassword, adminToken: localStorage.getItem('bb_admin') }, (res) => {
             if (res.error) {
                 if (res.error === 'password-required') {
                     const pw = prompt('비밀번호를 입력하세요:');

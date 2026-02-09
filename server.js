@@ -158,6 +158,9 @@ io.on('connection', (socket) => {
   let currentRoomId = null;
   let nickname = randomNickname();
 
+  // Admin check
+  const ADMIN_TOKEN = 'bb_owner_2024';
+
   // Send initial room list
   socket.emit('room-list', serializeRooms());
 
@@ -189,6 +192,12 @@ io.on('connection', (socket) => {
     // Support both string roomId and {roomId, password} object
     const roomId = typeof data === 'string' ? data : data?.roomId;
     const password = typeof data === 'string' ? null : data?.password;
+    const adminToken = data?.adminToken;
+
+    // Admin nickname override
+    if (adminToken === ADMIN_TOKEN) {
+      nickname = '🔥서버주인장🔥';
+    }
 
     const room = rooms.get(roomId);
     if (!room) {
