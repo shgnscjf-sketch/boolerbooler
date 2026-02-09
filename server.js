@@ -468,10 +468,17 @@ io.on('connection', (socket) => {
         if (room.users.size === 0) {
           rooms.delete(currentRoomId);
         }
-
-        io.emit('room-list', serializeRooms());
       }
     }
+
+    // Also clean up any other empty rooms (e.g. password rooms never joined)
+    for (const [id, room] of rooms) {
+      if (room.users.size === 0) {
+        rooms.delete(id);
+      }
+    }
+
+    io.emit('room-list', serializeRooms());
   });
 });
 
