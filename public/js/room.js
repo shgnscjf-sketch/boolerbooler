@@ -8,6 +8,7 @@
     const MAX_RECENT = 50;
     const STORAGE_FAVORITES = 'karaoke_favorites';
     const STORAGE_RECENT = 'karaoke_recent';
+    let ytSyncDelay = 1500; // YouTube 싱크 딜레이 (ms), 기본 1.5초
 
     // ── URL Params ──────────────────────────────────────────
     const params = new URLSearchParams(window.location.search);
@@ -217,7 +218,7 @@
         if (myMicSlot === 0) return; // I AM mic 1, ignore
 
         try {
-            const targetTime = data.currentTime - 1.5; // 1.5초 늦게 재생 (보이스 지연 보정)
+            const targetTime = data.currentTime - (ytSyncDelay / 1000); // 유튜브 싱크 딜레이 적용
             const myTime = ytPlayer.getCurrentTime();
             const diff = Math.abs(myTime - targetTime);
 
@@ -357,6 +358,18 @@
       `;
         }
 
+        // YouTube 싱크 딜레이 슬라이더 (1번 마이크가 아닌 경우에만)
+        if (myMicSlot !== 0) {
+            html += `
+            <div class="yt-sync-slider-wrap" onclick="event.stopPropagation()">
+              <div class="voice-delay-slider">
+                <label>📺 유튜브 싱크</label>
+                <input type="range" min="0" max="5000" step="100" value="${ytSyncDelay}" id="ytSyncSlider" />
+                <span class="voice-delay-val" id="ytSyncVal">${(ytSyncDelay / 1000).toFixed(1)}초</span>
+              </div>
+            </div>`;
+        }
+
         micSlotsEl.innerHTML = html;
 
         // Click handlers
@@ -434,6 +447,16 @@
                 applyVoiceVolume(sid, val);
             });
         });
+
+        // YouTube sync delay slider handler
+        const ytSyncSlider = document.getElementById('ytSyncSlider');
+        if (ytSyncSlider) {
+            ytSyncSlider.addEventListener('input', () => {
+                ytSyncDelay = parseInt(ytSyncSlider.value);
+                const label = document.getElementById('ytSyncVal');
+                if (label) label.textContent = (ytSyncDelay / 1000).toFixed(1) + '초';
+            });
+        }
 
     }
     // ── Voice Delay helpers ──────────────────────────────

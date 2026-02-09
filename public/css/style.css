@@ -1696,6 +1696,17 @@ h3 {
   }
 }
 
+/* ── YouTube Sync Slider ──────────────────────────────── */
+.yt-sync-slider-wrap {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-glass);
+}
+
+.yt-sync-slider-wrap .voice-delay-slider label {
+  color: var(--neon-blue);
+}
+
 /* ── Responsive ────────────────────────────────────────── */
 @media (max-width: 900px) {
   .room-layout {
